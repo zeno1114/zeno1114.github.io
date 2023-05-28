@@ -147,7 +147,7 @@
 
         // Print results
         console.log('Predictions for new X-values:', newX);
-        console.log('Predicted y-values (RandomForest):', newY.round(2));
+        console.log('Predicted y-values (RandomForest):', newY.map(value => value[0].toFixed(2)));
 
         // PLOT
         var trace1 = {
