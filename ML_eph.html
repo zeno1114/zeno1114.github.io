@@ -32,6 +32,7 @@
             0.38, 0.38, 0.4, 0.38, 0.69, 0.60, 1, 0.71, 1.12, 0.38, 0.60, 0.41, 0.82, 0.41, 0.38, 0.34, 0.65, 0.28, 0.46, 0.39, 0.34, 0.81, 0.93, 0.56, 0.35, 0.14, 0.11, 0.15, 0.16, 0.13, 
             0.12, 0.15, 0.20, 0.05, 0.27, 0.51, 0.62, 0.47, 0.66, 1.40, 1.63, 1.43, 0.89, 1.7, 1.75, 1.7, 1.46,  
             2, 1.46, 1.71, 1.68, 1.90, 0.67, 2.3, 1.85, 1.93, 1.68, 2.77, 0.61, 1.7, 0.87, 0.63, 0.68, 0.49];
+ 
         // Instantiate the model
         var model = new RandomForestRegressor(dataX, dataY, 100); // Include the number of trees (100) in the constructor
 
@@ -52,7 +53,85 @@
         }
 
         // RandomForestRegressor in JavaScript
-        // ... (this part of the code remains unchanged)
+        class RandomForestRegressor {
+            constructor(dataX, dataY, n_trees = 10) {
+                this.dataX = dataX;
+                this.dataY = dataY;
+                this.n_trees = n_trees;
+                this.trees = [];
+            }
+
+            fit() { // Simplified RandomForestRegressor: Trains a single tree
+                // Add a simple decision tree to trees
+                // In a complete implementation, this should build multiple trees using subsets
+                // of the data (bagging and random feature selection)
+                var tree = new DecisionTreeRegressor();
+                tree.fit(this.dataX, this.dataY);
+                this.trees.push(tree);
+            }
+
+            predict(X) {
+                // Aggregate predictions from all trees
+                var predictions = [];
+                for (var tree of this.trees) {
+                    var tree_predictions = tree.predict(X);
+                    predictions.push(tree_predictions);
+                }
+                // In a complete implementation, this should return the average of all predictions
+                return predictions[0]; // We only have a single tree in this example
+            }
+        }
+
+        class DecisionTreeRegressor { // Simple decision tree with one split
+            constructor() {
+                this.splitValue = null;
+                this.leftConstant = null;
+                this.rightConstant = null;
+            }
+
+            fit(X, y) {
+                var splitValue = this.calculateSplitValue(X, y);
+                this.splitValue = splitValue;
+
+                var leftY = y.filter((_, i) => X[i] < splitValue);
+                var rightY = y.filter((_, i) => X[i] >= splitValue);
+
+                this.leftConstant = math.mean(leftY);
+                this.rightConstant = math.mean(rightY);
+            }
+
+            calculateSplitValue(X, y) {
+                var bestSplitValue;
+                var minMse = Infinity;
+
+                for (var i = 0; i < X.length; i++) {
+                    var splitValue = X[i];
+                    var leftY = y.filter((_, j) => X[j] < splitValue);
+                    var rightY = y.filter((_, j) => X[j] >= splitValue);
+                    var leftMean = math.mean(leftY);
+                    var rightMean = math.mean(rightY);
+
+                    var mse = 0;
+                    for (var value of leftY) {
+                        mse += Math.pow(value - leftMean, 2);
+                    }
+                    for (var value of rightY) {
+                        mse += Math.pow(value - rightMean, 2);
+                    }
+
+                    if (mse < minMse) {
+                        minMse = mse;
+                        bestSplitValue = splitValue;
+                    }
+                }
+
+                return bestSplitValue;
+            }
+
+            predict(X) {
+                return X.map(x => x[0] < this.splitValue ? this.leftConstant : this.rightConstant);
+            }
+        }
 
         // Plot the data
         var trace1 = {
