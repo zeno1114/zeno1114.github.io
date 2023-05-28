@@ -45,11 +45,13 @@
                 // The modified predict function
                 var predictions = [];
                 for (var tree of this.trees) {
-                    var tree_predictions = tree.predict(X);
+                    var tree_predictions = tree.weighted_predict(X);
                     predictions.push(tree_predictions);
                 }
 
-                var avgPrediction = predictions.reduce((sum, pred) => sum + pred[0], 0) / predictions.length;
+                var weightedPredictions = predictions.map(x => x[0].prediction * x[0].weight);
+                var weightsSum = predictions.map(x => x[0].weight).reduce((sum, weight) => sum + weight, 0);
+                var avgPrediction = weightedPredictions.reduce((sum, pred) => sum + pred, 0) / weightsSum;
                 return [avgPrediction];
             }
         }
@@ -103,6 +105,17 @@
             predict(X) {
                 return X.map(x => x[0] < this.splitValue ? this.leftConstant : this.rightConstant);
             }
+
+            weighted_predict(X, kernel = 'gaussian') {
+                return X.map(x => {
+                    var distance = Math.abs(this.splitValue - x[0]);
+                    if (kernel === 'gaussian') {
+                        var scale = 10.0; // You can adjust this value to influence the weighting
+                        var gaussian_kernel = Math.exp(-Math.pow(distance / scale, 2)); // Gaussian kernel
+                        return { prediction: (x[0] < this.splitValue ? this.leftConstant : this.rightConstant), weight: gaussian_kernel };
+                    }
+                });
+            }
         }
 
         // Data
@@ -153,3 +166,5 @@
     </script>
 </body>
 </html>
+
+
