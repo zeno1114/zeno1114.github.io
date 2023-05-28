@@ -76,8 +76,8 @@
                     var splitValue = X[i];
                     var leftY = y.filter((_, j) => X[j] < splitValue);
                     var rightY = y.filter((_, j) => X[j] >= splitValue);
-                    var leftMean = math.mean(leftY);
-                    var rightMean = math.mean(rightY);
+                    var leftMean = leftY.length > 0 ? math.mean(leftY) : 0;
+                    var rightMean = rightY.length > 0 ? math.mean(rightY) : 0;
 
                     var mse = 0;
                     for (var value of leftY) {
