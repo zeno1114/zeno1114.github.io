@@ -29,20 +29,20 @@
             0.38, 0.38, 0.4, 0.38, 0.69, 0.60, 1, 0.71, 1.12, 0.38, 0.60, 0.41, 0.82, 0.41, 0.38, 0.34, 0.65, 0.28, 0.46, 0.39, 0.34, 0.81, 0.93, 0.56, 0.35, 0.14, 0.11, 0.15, 0.16, 0.13, 
             0.12, 0.15, 0.20, 0.05, 0.27, 0.51, 0.62, 0.47, 0.66, 1.40, 1.63, 1.43, 0.89, 1.7, 1.75, 1.7, 1.46,  
             2, 1.46, 1.71, 1.68, 1.90, 0.67, 2.3, 1.85, 1.93, 1.68, 2.77, 0.61, 1.7, 0.87, 0.63, 0.68, 0.49, ];
-		var model = new RandomForestRegressor(dataX, dataY);
+	var model = new RandomForestRegressor(dataX, dataY);
 
-		// Function to predict Y-value for the input X-value
-		function predict() {
-			// Get the input X-value from the input box
-			var inputX = parseFloat(document.getElementById("inputX").value);
+	// Function to predict Y-value for the input X-value
+	function predict() {
+		// Get the input X-value from the input box
+		var inputX = parseFloat(document.getElementById("inputX").value);
 
-			// Predict Y-value using the model
-			var predictedY = model.predict([[inputX]]);
+		// Predict Y-value using the model
+		var predictedY = model.predict([[inputX]]);
 
-			// Display the predicted Y-value in the output div
-			var outputDiv = document.getElementById("output");
-			outputDiv.innerHTML = "Predicted Y-value: " + predictedY[0].toFixed(2);
-		}
+		// Display the predicted Y-value in the output div
+		var outputDiv = document.getElementById("output");
+		outputDiv.innerHTML = "Predicted Y-value: " + predictedY[0].toFixed(2);
+	}
 
         // RandomForestRegressor in JavaScript
         function RandomForestRegressor(X, y, nTrees) {
