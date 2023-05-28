@@ -99,8 +99,9 @@
                     var leftLabels = leftData.map(point => point[1]);
                     var rightLabels = rightData.map(point => point[1]);
 
-                    var leftMSE = this.meanSquaredError(leftLabels, math.multiply(math.ones(leftLabels.length), math.mean(leftLabels)));
-                    var rightMSE = this.meanSquaredError(rightLabels, math.multiply(math.ones(rightLabels.length), math.mean(rightLabels)));
+                    var leftMSE = leftLabels.length > 0 ? this.meanSquaredError(leftLabels, math.multiply(math.ones(leftLabels.length), math.mean(leftLabels))) : 0;
+                    var rightMSE = rightLabels.length > 0 ? this.meanSquaredError(rightLabels, math.multiply(math.ones(rightLabels.length), math.mean(rightLabels))) : 0;
+
                     var score = leftMSE * leftLabels.length + rightMSE * rightLabels.length;
 
                     if (score < bestSplitScore) {
