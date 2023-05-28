@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Python to HTML/JS Converter</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/numeric/1.2.6/numeric.min.js"></script>
+</head>
+<body>
+
+    <div id="plot"></div>
+
+    <script>
+        // Data
+        var dataX = [20.80, 27.96, 40.12, 59.08, 71.07, 73.13, 73.13, 75.18, 76.97, 78.13, 81.00, 81.09, 82.25, 82.16, 83.95, 85.92, 87.35, 89.31, 86.99, 90.21, 94.23, 90.12, 123.12,
+            1.16, 0.85, 1.08, 0.52, 3.40, 3.72, 4.16, 2.38, 7.19, 0.39, 5.30, 0.55, 9.22, 0.92, 0.49, 0.09, 4.48, 0.012, 1.69, 0.65, 0.14, 4.88, 6.00, 1.38, 0, 0, 0, 0, 0, 0, 
+            0, 0, 0, 0, 0, 0, 0, 0, 0, 5.6, 6.4, 5.2, 17.1, 18.5, 17.8, 20, 16, 
+            190, 134, 161, 161, 145, 7.7, 164.8, 127.2, 192.5, 64.4, 240, 5.1, 0, 8.7, 5.3, 7.4, 3.95, ];
+        var dataY = [0.32, 0.36, 0.28, 0.51, 0.54, 0.52, 0.55, 0.56, 0.54, 0.58, 0.58, 0.56, 0.55, 0.54, 0.583, 0.60, 0.62, 0.63, 0.56, 0.57, 0.66, 0.69, 1.11,
+            0.38, 0.38, 0.4, 0.38, 0.69, 0.60, 1, 0.71, 1.12, 0.38, 0.60, 0.41, 0.82, 0.41, 0.38, 0.34, 0.65, 0.28, 0.46, 0.39, 0.34, 0.81, 0.93, 0.56, 0.35, 0.14, 0.11, 0.15, 0.16, 0.13, 
+            0.12, 0.15, 0.20, 0.05, 0.27, 0.51, 0.62, 0.47, 0.66, 1.40, 1.63, 1.43, 0.89, 1.7, 1.75, 1.7, 1.46,  
+            2, 1.46, 1.71, 1.68, 1.90, 0.67, 2.3, 1.85, 1.93, 1.68, 2.77, 0.61, 1.7, 0.87, 0.63, 0.68, 0.49, ];
+        var newX = [[50], [91], [110], [120], [133], [400]];  // example new X-values
+
+        // RandomForestRegressor in JavaScript
+        function RandomForestRegressor(X, y, nTrees) {
+            this.X = X;
+            this.y = y;
+            this.nTrees = nTrees;
+
+            this.generateBootstrapSample = function() {
+                var sample = [];
+                var idx = [];
+                for (var i = 0; i < this.X.length; i++) {
+                    var randomIndex = Math.floor(Math.random() * this.X.length);
+                    sample.push(this.X[randomIndex]);
+                    idx.push(randomIndex);
+                }
+                return [sample, idx];
+            };
+
+            this.fit = function() {
+                if (!this.nTrees) {
+                    console.warn('Number of trees is not set. Defaulting to 100.');
+                    this.nTrees = 100;
+                }
+                this.trees = [];
+                for (var i = 0; i < this.nTrees; i++) {
+                    var sampleAndIndex = this.generateBootstrapSample();
+                    var sample = sampleAndIndex[0];
+                    var idx = sampleAndIndex[1];
+                    var target = idx.map(index => this.y[index]);
+                    var tree = new DecisionTree(sample, target);
+                    tree.build();
+                    this.trees.push(tree);
+                }
+            };
+
+            this.predict = function(X) {
+                var predictions = [];
+                X.forEach(x => {
+                    var treePredictions = this.trees.map(tree => tree.predict(x));
+                    var predictedValue = numeric.mean(treePredictions);
+                    predictions.push(predictedValue);
+                });
+                return predictions;
+            };
+        }
+
+        // DecisionTree Class
+        function DecisionTree(X, y) {
+            this.X = X;
+            this.y = y;
+
+            this.meanSquaredError = function(yTrue, yPred) {
+                return numeric.norm2(numeric.sub(yTrue, yPred)) ** 2 / yTrue.length;
+            }
+
+            this.build = function() {
+                var data = this.X.map((value, index) => [value, this.y[index]]);
+                this.tree = this.buildTree(data);
+            };
+
+            this.buildTree = function(data, depth = 0) {
+                if (data.length <= 1 || depth > 100) {
+                    return {value: numeric.mean(data.map(point => point[1]))};
+                }
+
+                var bestSplitValue = data[0][0];
+                var bestSplitScore = Number.MAX_VALUE;
+                data.sort((a, b) => a[0] - b[0]);  // sort by X
+
+                for (var i = 1; i < data.length; i++) {
+                    var leftData = data.slice(0, i);
+                    var rightData = data.slice(i);
+
+                    var leftLabels = leftData.map(point => point[1]);
+                    var rightLabels = rightData.map(point => point[1]);
+
+                    var leftMSE = this.meanSquaredError(leftLabels, numeric.rep([leftLabels.length], numeric.mean(leftLabels)));
+                    var rightMSE = this.meanSquaredError(rightLabels, numeric.rep([rightLabels.length], numeric.mean(rightLabels)));
+                    var score = leftMSE * leftLabels.length + rightMSE * rightLabels.length;
+
+                    if (score < bestSplitScore) {
+                        bestSplitScore = score;
+                        bestSplitValue = data[i][0];
+                    }
+                }
+                return {
+                    splitValue: bestSplitValue,
+                    left: this.buildTree(data.filter(point => point[0] <= bestSplitValue), depth + 1),
+                    right: this.buildTree(data.filter(point => point[0] > bestSplitValue), depth + 1)
+                };
+            };
+
+            this.predict = function(x) {
+                return this.predictInSubtree(this.tree, x);
+            };
+
+            this.predictInSubtree = function(subtree, x) {
+                if (!subtree.hasOwnProperty('splitValue')) {
+                    return subtree.value;
+                }
+                if (x <= subtree.splitValue) {
+                    return this.predictInSubtree(subtree.left, x);
+                } else {
+                    return this.predictInSubtree(subtree.right, x);
+                }
+            };
+        }
+
+        // RandomForest Model
+        var model = new RandomForestRegressor(dataX, dataY);
+
+        // Fit the model
+        model.fit();
+
+        // Predict
+        var newY = model.predict(newX);
+
+        // Print results
+        console.log('Predictions for new X-values:', newX);
+        console.log('Predicted y-values (RandomForest):', newY.round(2));
+
+        // PLOT
+        var trace1 = {
+            x: dataX,
+            y: dataY,
+            mode: 'markers',
+            name: 'Training Data',
+            marker: { size: 8 }
+        };
+        
+        var trace2 = {
+            x: newX.flat(),
+            y: newY,
+            mode: 'markers',
+            name: 'Predictions',
+            marker: { size: 8, color: "red" }
+        };
+        
+        var traces = [trace1, trace2];
+        
+        var layout = {
+            title: 'Random Forest Regressor',
+            xaxis: { title: 'X' },
+            yaxis: { title: 'Y' },
+        };
+        
+        Plotly.newPlot('plot', traces, layout);
+    </script>
+</body>
+</html>
