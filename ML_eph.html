@@ -84,6 +84,9 @@
             };
 
             this.buildTree = function(data, depth = 0) {
+                if (data.length === 0) {
+                return null; // or return { value: 0 } if you prefer a fixed value
+                }
                 if (data.length <= 1 || depth > 100) {
                     return {value: math.mean(data.map(point => point[1]))};
                 }
@@ -122,8 +125,8 @@
             };
 
             this.predictInSubtree = function(subtree, x) {
-                if (!subtree.hasOwnProperty('splitValue')) {
-                    return subtree.value;
+                if (subtree === null || !subtree.hasOwnProperty('splitValue')) {
+                return 0; // or a fixed value you'd like to use when there's an empty array
                 }
                 if (x <= subtree.splitValue) {
                     return this.predictInSubtree(subtree.left, x);
