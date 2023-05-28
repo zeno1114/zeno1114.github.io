@@ -33,20 +33,24 @@
             }
 
             fit() {
-                // Add a simple decision tree to trees
-                var tree = new DecisionTreeRegressor();
-                tree.fit(this.dataX, this.dataY);
-                this.trees.push(tree);
+                // The modified fit function
+                for (var i = 0; i < this.n_trees; i++) {
+                    var tree = new DecisionTreeRegressor();
+                    tree.fit(this.dataX, this.dataY);
+                    this.trees.push(tree);
+                }
             }
 
             predict(X) {
-                // Aggregate predictions from all trees
+                // The modified predict function
                 var predictions = [];
                 for (var tree of this.trees) {
                     var tree_predictions = tree.predict(X);
                     predictions.push(tree_predictions);
                 }
-                return predictions[0]; // This is a simplified version, return the average of all predictions in a complete implementation
+
+                var avgPrediction = predictions.reduce((sum, pred) => sum + pred[0], 0) / predictions.length;
+                return [avgPrediction];
             }
         }
 
