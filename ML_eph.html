@@ -62,7 +62,7 @@
                 var predictions = [];
                 X.forEach(x => {
                     var treePredictions = this.trees.map(tree => tree.predict(x));
-                    var predictedValue = numeric.mean(treePredictions);
+                    var predictedValue = math.mean(treePredictions);
                     predictions.push(predictedValue);
                 });
                 return predictions;
@@ -75,7 +75,7 @@
             this.y = y;
 
             this.meanSquaredError = function(yTrue, yPred) {
-                return numeric.norm2(numeric.sub(yTrue, yPred)) ** 2 / yTrue.length;
+                return math.norm(math.subtract(yTrue, yPred), 2) ** 2 / yTrue.length;
             }
 
             this.build = function() {
@@ -85,7 +85,7 @@
 
             this.buildTree = function(data, depth = 0) {
                 if (data.length <= 1 || depth > 100) {
-                    return {value: numeric.mean(data.map(point => point[1]))};
+                    return {value: math.mean(data.map(point => point[1]))};
                 }
 
                 var bestSplitValue = data[0][0];
@@ -99,8 +99,8 @@
                     var leftLabels = leftData.map(point => point[1]);
                     var rightLabels = rightData.map(point => point[1]);
 
-                    var leftMSE = this.meanSquaredError(leftLabels, numeric.rep([leftLabels.length], numeric.mean(leftLabels)));
-                    var rightMSE = this.meanSquaredError(rightLabels, numeric.rep([rightLabels.length], numeric.mean(rightLabels)));
+                    var leftMSE = this.meanSquaredError(leftLabels, math.multiply(math.ones(leftLabels.length), math.mean(leftLabels)));
+                    var rightMSE = this.meanSquaredError(rightLabels, math.multiply(math.ones(rightLabels.length), math.mean(rightLabels)));
                     var score = leftMSE * leftLabels.length + rightMSE * rightLabels.length;
 
                     if (score < bestSplitScore) {
