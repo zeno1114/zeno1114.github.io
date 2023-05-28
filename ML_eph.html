@@ -102,6 +102,7 @@
                     var leftMSE = leftLabels.length > 0 ? this.meanSquaredError(leftLabels, math.multiply(math.ones(leftLabels.length), math.mean(leftLabels))) : 0;
                     var rightMSE = rightLabels.length > 0 ? this.meanSquaredError(rightLabels, math.multiply(math.ones(rightLabels.length), math.mean(rightLabels))) : 0;
 
+
                     var score = leftMSE * leftLabels.length + rightMSE * rightLabels.length;
 
                     if (score < bestSplitScore) {
