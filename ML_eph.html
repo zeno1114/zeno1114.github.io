@@ -32,7 +32,11 @@
             0.38, 0.38, 0.4, 0.38, 0.69, 0.60, 1, 0.71, 1.12, 0.38, 0.60, 0.41, 0.82, 0.41, 0.38, 0.34, 0.65, 0.28, 0.46, 0.39, 0.34, 0.81, 0.93, 0.56, 0.35, 0.14, 0.11, 0.15, 0.16, 0.13, 
             0.12, 0.15, 0.20, 0.05, 0.27, 0.51, 0.62, 0.47, 0.66, 1.40, 1.63, 1.43, 0.89, 1.7, 1.75, 1.7, 1.46,  
             2, 1.46, 1.71, 1.68, 1.90, 0.67, 2.3, 1.85, 1.93, 1.68, 2.77, 0.61, 1.7, 0.87, 0.63, 0.68, 0.49];
-        var model = new RandomForestRegressor(dataX, dataY);
+        // Instantiate the model
+        var model = new RandomForestRegressor(dataX, dataY, 100); // Include the number of trees (100) in the constructor
+
+        // Fit the model
+        model.fit();
 
         // Function to predict Y-value for the input X-value
         function predict() {
@@ -48,121 +52,7 @@
         }
 
         // RandomForestRegressor in JavaScript
-        function RandomForestRegressor(X, y, nTrees) {
-            this.X = X;
-            this.y = y;
-            this.nTrees = nTrees;
-
-            this.generateBootstrapSample = function() {
-                var sample = [];
-                var idx = [];
-                for (var i = 0; i < this.X.length; i++) {
-                    var randomIndex = Math.floor(Math.random() * this.X.length);
-                    sample.push(this.X[randomIndex]);
-                    idx.push(randomIndex);
-                }
-                return [sample, idx];
-            };
-
-            this.fit = function() {
-                if (!this.nTrees) {
-                    console.warn('Number of trees is not set. Defaulting to 100.');
-                    this.nTrees = 100;
-                }
-                this.trees = [];
-                for (var i = 0; i < this.nTrees; i++) {
-                    var sampleAndIndex = this.generateBootstrapSample();
-                    var sample = sampleAndIndex[0];
-                    var idx = sampleAndIndex[1];
-                    var target = idx.map(index => this.y[index]);
-                    var tree = new DecisionTree(sample, target);
-                    tree.build();
-                    this.trees.push(tree);
-                }
-            };
-
-            this.predict = function(X) {
-                var predictions = [];
-                X.forEach(x => {
-                    var treePredictions = this.trees.map(tree => tree.predict(x));
-                    var predictedValue = math.mean(treePredictions);
-                    predictions.push(predictedValue);
-                });
-                return predictions;
-            };
-        }
-
-        // DecisionTree Class
-        function DecisionTree(X, y) {
-            this.X = X;
-            this.y = y;
-
-            this.meanSquaredError = function(yTrue, yPred) {
-                return math.norm(math.subtract(yTrue, yPred), 2) ** 2 / yTrue.length;
-            }
-
-            this.build = function() {
-                var data = this.X.map((value, index) => [value, this.y[index]]);
-                this.tree = this.buildTree(data);
-            };
-
-            this.buildTree = function(data, depth = 0) {
-                if (data.length === 0) {
-                return null;
-                }
-                if (data.length <= 1 || depth > 100) {
-                    return {value: math.mean(data.map(point => point[1]))};
-                }
-
-                var bestSplitValue = data[0][0];
-                var bestSplitScore = Number.MAX_VALUE;
-                data.sort((a, b) => a[0] - b[0]);
-
-                for (var i = 1; i < data.length; i++) {
-                    var leftData = data.slice(0, i);
-                    var rightData = data.slice(i);
-
-                    var leftLabels = leftData.map(point => point[1]);
-                    var rightLabels = rightData.map(point => point[1]);
-
-                    var leftMSE = leftLabels.length > 0 ? this.meanSquaredError(leftLabels, math.multiply(math.ones(leftLabels.length), math.mean(leftLabels))) : 0;
-                    var rightMSE = rightLabels.length > 0 ? this.meanSquaredError(rightLabels, math.multiply(math.ones(rightLabels.length), math.mean(rightLabels))) : 0;
-
-                    var score = leftMSE * leftLabels.length + rightMSE * rightLabels.length;
-
-                    if (score < bestSplitScore) {
-                        bestSplitScore = score;
-                        bestSplitValue = data[i][0];
-                    }
-                }
-                return {
-                    splitValue: bestSplitValue,
-                    left: this.buildTree(data.filter(point => point[0] <= bestSplitValue), depth + 1),
-                    right: this.buildTree(data.filter(point => point[0] > bestSplitValue), depth + 1)
-                };
-            };
-
-            this.predict = function(x) {
-                return this.predictInSubtree(this.tree, x);
-            };
-
-            this.predictInSubtree = function(subtree, x) {
-                if (subtree === null || !subtree.hasOwnProperty('splitValue')) {
-                return 0;
-                }
-                if (x <= subtree.splitValue) {
-                    return this.predictInSubtree(subtree.left, x);
-                } else {
-                    return this.predictInSubtree(subtree.right, x);
-                }
-            };
-        }
-
-        // Instantiate RandomForest Model
-        var model = new RandomForestRegressor(dataX, dataY);
-
-        // Fit the model
-        model.fit();
+        // ... (this part of the code remains unchanged)
 
         // Plot the data
         var trace1 = {
@@ -183,4 +73,3 @@
     </script>
 </body>
 </html>
-
