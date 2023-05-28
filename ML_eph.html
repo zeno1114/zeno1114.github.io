@@ -5,47 +5,47 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Python to HTML/JS Converter</title>
-    <script src="plotly.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
 </head>
 <body>
-	  <!-- Add an input box for the user to enter X-value -->
-	  <label for="inputX">Enter X-value:</label>
-	  <input type="number" id="inputX" name="inputX">
- 
-	  <!-- Add a button to trigger the prediction -->
-	  <button onclick="predict()">Predict</button>
+    <!-- Add an input box for the user to enter X-value -->
+    <label for="inputX">Enter X-value:</label>
+    <input type="number" id="inputX" name="inputX">
 
-	  <!-- Add a div to display the predicted Y-value -->
-	  <div id="output"></div>
-	
-	  <!-- Add a div to display the plot -->
-          <div id="plot"></div>
+    <!-- Add a button to trigger the prediction -->
+    <button onclick="predict()">Predict</button>
+
+    <!-- Add a div to display the predicted Y-value -->
+    <div id="output"></div>
+
+    <!-- Add a div to display the plot -->
+    <div id="plot"></div>
 
     <script>
         // Data
         var dataX = [20.80, 27.96, 40.12, 59.08, 71.07, 73.13, 73.13, 75.18, 76.97, 78.13, 81.00, 81.09, 82.25, 82.16, 83.95, 85.92, 87.35, 89.31, 86.99, 90.21, 94.23, 90.12, 123.12,
             1.16, 0.85, 1.08, 0.52, 3.40, 3.72, 4.16, 2.38, 7.19, 0.39, 5.30, 0.55, 9.22, 0.92, 0.49, 0.09, 4.48, 0.012, 1.69, 0.65, 0.14, 4.88, 6.00, 1.38, 0, 0, 0, 0, 0, 0, 
             0, 0, 0, 0, 0, 0, 0, 0, 0, 5.6, 6.4, 5.2, 17.1, 18.5, 17.8, 20, 16, 
-            190, 134, 161, 161, 145, 7.7, 164.8, 127.2, 192.5, 64.4, 240, 5.1, 0, 8.7, 5.3, 7.4, 3.95, ];
+            190, 134, 161, 161, 145, 7.7, 164.8, 127.2, 192.5, 64.4, 240, 5.1, 0, 8.7, 5.3, 7.4, 3.95];
         var dataY = [0.32, 0.36, 0.28, 0.51, 0.54, 0.52, 0.55, 0.56, 0.54, 0.58, 0.58, 0.56, 0.55, 0.54, 0.583, 0.60, 0.62, 0.63, 0.56, 0.57, 0.66, 0.69, 1.11,
             0.38, 0.38, 0.4, 0.38, 0.69, 0.60, 1, 0.71, 1.12, 0.38, 0.60, 0.41, 0.82, 0.41, 0.38, 0.34, 0.65, 0.28, 0.46, 0.39, 0.34, 0.81, 0.93, 0.56, 0.35, 0.14, 0.11, 0.15, 0.16, 0.13, 
             0.12, 0.15, 0.20, 0.05, 0.27, 0.51, 0.62, 0.47, 0.66, 1.40, 1.63, 1.43, 0.89, 1.7, 1.75, 1.7, 1.46,  
-            2, 1.46, 1.71, 1.68, 1.90, 0.67, 2.3, 1.85, 1.93, 1.68, 2.77, 0.61, 1.7, 0.87, 0.63, 0.68, 0.49, ];
-	var model = new RandomForestRegressor(dataX, dataY);
+            2, 1.46, 1.71, 1.68, 1.90, 0.67, 2.3, 1.85, 1.93, 1.68, 2.77, 0.61, 1.7, 0.87, 0.63, 0.68, 0.49];
+        var model = new RandomForestRegressor(dataX, dataY);
 
-	// Function to predict Y-value for the input X-value
-	function predict() {
-		// Get the input X-value from the input box
-		var inputX = parseFloat(document.getElementById("inputX").value);
+        // Function to predict Y-value for the input X-value
+        function predict() {
+            // Get the input X-value from the input box
+            var inputX = parseFloat(document.getElementById("inputX").value);
 
-		// Predict Y-value using the model
-		var predictedY = model.predict([[inputX]]);
+            // Predict Y-value using the model
+            var predictedY = model.predict([[inputX]]);
 
-		// Display the predicted Y-value in the output div
-		var outputDiv = document.getElementById("output");
-		outputDiv.innerHTML = "Predicted Y-value: " + predictedY[0].toFixed(2);
-	}
+            // Display the predicted Y-value in the output div
+            var outputDiv = document.getElementById("output");
+            outputDiv.innerHTML = "Predicted Y-value: " + predictedY[0].toFixed(2);
+        }
 
         // RandomForestRegressor in JavaScript
         function RandomForestRegressor(X, y, nTrees) {
@@ -108,7 +108,7 @@
 
             this.buildTree = function(data, depth = 0) {
                 if (data.length === 0) {
-                return null; // or return { value: 0 } if you prefer a fixed value
+                return null;
                 }
                 if (data.length <= 1 || depth > 100) {
                     return {value: math.mean(data.map(point => point[1]))};
@@ -116,7 +116,7 @@
 
                 var bestSplitValue = data[0][0];
                 var bestSplitScore = Number.MAX_VALUE;
-                data.sort((a, b) => a[0] - b[0]);  // sort by X
+                data.sort((a, b) => a[0] - b[0]);
 
                 for (var i = 1; i < data.length; i++) {
                     var leftData = data.slice(0, i);
@@ -127,7 +127,6 @@
 
                     var leftMSE = leftLabels.length > 0 ? this.meanSquaredError(leftLabels, math.multiply(math.ones(leftLabels.length), math.mean(leftLabels))) : 0;
                     var rightMSE = rightLabels.length > 0 ? this.meanSquaredError(rightLabels, math.multiply(math.ones(rightLabels.length), math.mean(rightLabels))) : 0;
-
 
                     var score = leftMSE * leftLabels.length + rightMSE * rightLabels.length;
 
@@ -149,7 +148,7 @@
 
             this.predictInSubtree = function(subtree, x) {
                 if (subtree === null || !subtree.hasOwnProperty('splitValue')) {
-                return 0; // or a fixed value you'd like to use when there's an empty array
+                return 0;
                 }
                 if (x <= subtree.splitValue) {
                     return this.predictInSubtree(subtree.left, x);
@@ -159,20 +158,13 @@
             };
         }
 
-        // RandomForest Model
+        // Instantiate RandomForest Model
         var model = new RandomForestRegressor(dataX, dataY);
 
         // Fit the model
         model.fit();
 
-        // Predict
-        var newY = model.predict(newX);
-
-        // Print results
-        console.log('Predictions for new X-values:', newX);
-        console.log('Predicted y-values (RandomForest):', newY.map(value => value.toFixed(2)));
-
-        // PLOT
+        // Plot the data
         var trace1 = {
             x: dataX,
             y: dataY,
@@ -180,24 +172,15 @@
             name: 'Training Data',
             marker: { size: 8 }
         };
-        
-        var trace2 = {
-            x: newX.flat(),
-            y: newY,
-            mode: 'markers',
-            name: 'Predictions',
-            marker: { size: 8, color: "red" }
-        };
-        
-        var traces = [trace1, trace2];
-        
+
         var layout = {
             title: 'Random Forest Regressor',
             xaxis: { title: 'X' },
             yaxis: { title: 'Y' },
         };
-        
-        Plotly.newPlot('plot', traces, layout);
+
+        Plotly.newPlot('plot', [trace1], layout);
     </script>
 </body>
 </html>
+
