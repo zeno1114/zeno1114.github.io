@@ -10,7 +10,7 @@
     <script src="https://unpkg.com/moment@2.29.4/moment.js"></script>
 </head>
 <body>
-    <label for="inputX">Enter X-value:</label>
+    <label for="inputX">Enter Tc-value:</label>
     <input type="number" id="inputX" name="inputX">
     <button onclick="predict()">Predict</button>
     <div id="output"></div>
@@ -110,7 +110,7 @@
           const inputX = parseFloat(document.getElementById("inputX").value);
           const predictedY = forestModel.predict([[inputX]]);
           const outputDiv = document.getElementById("output");
-          outputDiv.innerHTML = "Predicted Y-value: " + predictedY[0].toFixed(2);
+          outputDiv.innerHTML = "Predicted λ-value: " + predictedY[0].toFixed(2);
         }
 
         const trace1 = {
@@ -123,8 +123,8 @@
 
         const layout = {
          title: 'Random Forest Regressor',
-         xaxis: { title: 'X' },
-         yaxis: { title: 'Y' },
+         xaxis: { title: 'Tc (K)' },
+         yaxis: { title: 'λe-ph' },
         };
 
         Plotly.newPlot('plot', [trace1], layout);
