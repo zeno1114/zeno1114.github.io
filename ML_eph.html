@@ -7,7 +7,7 @@
     <title>Python to HTML/JS Converter</title>
     <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
-    <script src="https://unpkg.com/mljs/random-forest" crossorigin></script>
+    <script src="https://unpkg.com/moment@2.29.4/moment.js"></script>
 </head>
 <body>
     <label for="inputX">Enter X-value:</label>
@@ -18,7 +18,7 @@
 
     <script>
         class RandomForestRegressor {
-            constructor(dataX, dataY, n_trees = 10) {
+            constructor(dataX, dataY, n_trees = 10) {"
                 this.dataX = dataX;
                 this.dataY = dataY;
                 this.n_trees = n_trees;
