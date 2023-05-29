@@ -37,7 +37,7 @@
             bootstrap() {
                 const sampleIndices = [...Array(this.dataX.length).keys()];
                 const sampledIndices = sampleIndices.map(_ => sampleIndices[Math.floor(Math.random() * sampleIndices.length)]);
-                const bootstrappedDataX = sampledIndices.map(i => this.dataX[i]);
+                const bootstrappedDataX = sampledIndices.map(i => [this.dataX[i]]);
                 const bootstrappedDataY = sampledIndices.map(i => this.dataY[i]);
                 return { bootstrappedDataX, bootstrappedDataY };
             }
@@ -70,8 +70,8 @@
                 let minMse = Infinity;
                 for (let i = 0; i < X.length; i++) {
                     const splitValue = X[i];
-                    const leftY = y.filter((_, j) => X[j] < splitValue);
-                    const rightY = y.filter((_, j) => X[j] >= splitValue);
+                    const leftY = y.filter((_, j) => X[j][0] < splitValue);
+                    const rightY = y.filter((_, j) => X[j][0] >= splitValue);
                     const leftMean = leftY.length > 0 ? math.mean(leftY) : 0;
                     const rightMean = rightY.length > 0 ? math.mean(rightY) : 0;
                     let mse = 0;
@@ -90,7 +90,7 @@
             }
 
             predict(X) {
-                return X.map(x => x < this.splitValue ? this.leftConstant : this.rightConstant);
+                return X.map(x => x[0] < this.splitValue ? this.leftConstant : this.rightConstant);
             }
         }
 
