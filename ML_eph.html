@@ -9,21 +9,13 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.0.0/math.min.js"></script>
 </head>
 <body>
-    <!-- Add an input box for the user to enter X-value -->
     <label for="inputX">Enter X-value:</label>
     <input type="number" id="inputX" name="inputX">
-
-    <!-- Add a button to trigger the prediction -->
     <button onclick="predict()">Predict</button>
-
-    <!-- Add a div to display the predicted Y-value -->
     <div id="output"></div>
-
-    <!-- Add a div to display the plot -->
     <div id="plot"></div>
 
     <script>
-        // RandomForestRegressor and DecisionTreeRegressor class definition
         class RandomForestRegressor {
             constructor(dataX, dataY, n_trees = 10) {
                 this.dataX = dataX;
@@ -33,26 +25,26 @@
             }
 
             fit() {
-                // The modified fit function
                 for (var i = 0; i < this.n_trees; i++) {
-                    var tree = new DecisionTreeRegressor();
-                    tree.fit(this.dataX, this.dataY);
+                    const tree = new DecisionTreeRegressor();
+                    const { bootstrappedDataX, bootstrappedDataY } = this.bootstrap();
+                    tree.fit(bootstrappedDataX, bootstrappedDataY);
                     this.trees.push(tree);
                 }
             }
 
-            predict(X) {
-                // The modified predict function
-                var predictions = [];
-                for (var tree of this.trees) {
-                    var tree_predictions = tree.weighted_predict(X);
-                    predictions.push(tree_predictions);
-                }
+            bootstrap() {
+                const sampleIndices = [...Array(this.dataX.length).keys()];
+                const sampledIndices = sampleIndices.map(_ => sampleIndices[Math.floor(Math.random() * sampleIndices.length)]);
+                const bootstrappedDataX = sampledIndices.map(i => this.dataX[i]);
+                const bootstrappedDataY = sampledIndices.map(i => this.dataY[i]);
+                return { bootstrappedDataX, bootstrappedDataY };
+            }
 
-                var weightedPredictions = predictions.map(x => x[0].prediction * x[0].weight);
-                var weightsSum = predictions.map(x => x[0].weight).reduce((sum, weight) => sum + weight, 0);
-                var avgPrediction = weightedPredictions.reduce((sum, pred) => sum + pred, 0) / weightsSum;
-                return [avgPrediction];
+            predict(X) {
+                const predictions = this.trees.map(tree => tree.predict(X));
+                const avgPrediction = predictions[0].map((_, i) => predictions.map(pred => pred[i]).reduce((a, b) => a + b, 0) / this.n_trees);
+                return avgPrediction;
             }
         }
 
@@ -64,91 +56,63 @@
             }
 
             fit(X, y) {
-                var splitValue = this.calculateSplitValue(X, y);
+                const splitValue = this.calculateSplitValue(X, y);
                 this.splitValue = splitValue;
-
-                var leftY = y.filter((_, i) => X[i] < splitValue);
-                var rightY = y.filter((_, i) => X[i] >= splitValue);
-
+                const leftY = y.filter((_, i) => X[i] < splitValue);
+                const rightY = y.filter((_, i) => X[i] >= splitValue);
                 this.leftConstant = math.mean(leftY);
                 this.rightConstant = math.mean(rightY);
             }
 
             calculateSplitValue(X, y) {
-                var bestSplitValue;
-                var minMse = Infinity;
-
-                for (var i = 0; i < X.length; i++) {
-                    var splitValue = X[i];
-                    var leftY = y.filter((_, j) => X[j] < splitValue);
-                    var rightY = y.filter((_, j) => X[j] >= splitValue);
-                    var leftMean = leftY.length > 0 ? math.mean(leftY) : 0;
-                    var rightMean = rightY.length > 0 ? math.mean(rightY) : 0;
-
-                    var mse = 0;
-                    for (var value of leftY) {
+                let bestSplitValue;
+                let minMse = Infinity;
+                for (let i = 0; i < X.length; i++) {
+                    const splitValue = X[i];
+                    const leftY = y.filter((_, j) => X[j] < splitValue);
+                    const rightY = y.filter((_, j) => X[j] >= splitValue);
+                    const leftMean = leftY.length > 0 ? math.mean(leftY) : 0;
+                    const rightMean = rightY.length > 0 ? math.mean(rightY) : 0;
+                    let mse = 0;
+                    for (const value of leftY) {
                         mse += Math.pow(value - leftMean, 2);
                     }
-                    for (var value of rightY) {
+                    for (const value of rightY) {
                         mse += Math.pow(value - rightMean, 2);
                     }
-
                     if (mse < minMse) {
                         minMse = mse;
                         bestSplitValue = splitValue;
                     }
                 }
-
                 return bestSplitValue;
             }
 
             predict(X) {
-                return X.map(x => x[0] < this.splitValue ? this.leftConstant : this.rightConstant);
-            }
-
-            weighted_predict(X, kernel = 'gaussian') {
-                return X.map(x => {
-                    var distance = Math.abs(this.splitValue - x[0]);
-                    if (kernel === 'gaussian') {
-                        var scale = 10.0; // You can adjust this value to influence the weighting
-                        var gaussian_kernel = Math.exp(-Math.pow(distance / scale, 2)); // Gaussian kernel
-                        return { prediction: (x[0] < this.splitValue ? this.leftConstant : this.rightConstant), weight: gaussian_kernel };
-                    }
-                });
+                return X.map(x => x < this.splitValue ? this.leftConstant : this.rightConstant);
             }
         }
 
-        // Data
-        var dataX = [20.80, 27.96, 40.12, 59.08, 71.07, 73.13, 73.13, 75.18, 76.97, 78.13, 81.00, 81.09, 82.25, 82.16, 83.95, 85.92, 87.35, 89.31, 86.99, 90.21, 94.23, 90.12, 123.12,
+        const dataX = [20.80, 27.96, 40.12, 59.08, 71.07, 73.13, 73.13, 75.18, 76.97, 78.13, 81.00, 81.09, 82.25, 82.16, 83.95, 85.92, 87.35, 89.31, 86.99, 90.21, 94.23, 90.12, 123.12,
             1.16, 0.85, 1.08, 0.52, 3.40, 3.72, 4.16, 2.38, 7.19, 0.39, 5.30, 0.55, 9.22, 0.92, 0.49, 0.09, 4.48, 0.012, 1.69, 0.65, 0.14, 4.88, 6.00, 1.38, 0, 0, 0, 0, 0, 0, 
             0, 0, 0, 0, 0, 0, 0, 0, 0, 5.6, 6.4, 5.2, 17.1, 18.5, 17.8, 20, 16, 
             190, 134, 161, 161, 145, 7.7, 164.8, 127.2, 192.5, 64.4, 240, 5.1, 0, 8.7, 5.3, 7.4, 3.95];
-        var dataY = [0.32, 0.36, 0.28, 0.51, 0.54, 0.52, 0.55, 0.56, 0.54, 0.58, 0.58, 0.56, 0.55, 0.54, 0.583, 0.60, 0.62, 0.63, 0.56, 0.57, 0.66, 0.69, 1.11,
+        const dataY = [0.32, 0.36, 0.28, 0.51, 0.54, 0.52, 0.55, 0.56, 0.54, 0.58, 0.58, 0.56, 0.55, 0.54, 0.583, 0.60, 0.62, 0.63, 0.56, 0.57, 0.66, 0.69, 1.11,
             0.38, 0.38, 0.4, 0.38, 0.69, 0.60, 1, 0.71, 1.12, 0.38, 0.60, 0.41, 0.82, 0.41, 0.38, 0.34, 0.65, 0.28, 0.46, 0.39, 0.34, 0.81, 0.93, 0.56, 0.35, 0.14, 0.11, 0.15, 0.16, 0.13, 
             0.12, 0.15, 0.20, 0.05, 0.27, 0.51, 0.62, 0.47, 0.66, 1.40, 1.63, 1.43, 0.89, 1.7, 1.75, 1.7, 1.46,  
             2, 1.46, 1.71, 1.68, 1.90, 0.67, 2.3, 1.85, 1.93, 1.68, 2.77, 0.61, 1.7, 0.87, 0.63, 0.68, 0.49];
 
-        // Instantiate the model
-        var model = new RandomForestRegressor(dataX, dataY, 100); // Include the number of trees (100) in the constructor
-
-        // Fit the model
+        const model = new RandomForestRegressor(dataX, dataY, 100);
         model.fit();
 
-        // Function to predict Y-value for the input X-value
         function predict() {
-            // Get the input X-value from the input box
-            var inputX = parseFloat(document.getElementById("inputX").value);
-
-            // Predict Y-value using the model
-            var predictedY = model.predict([[inputX]]);
-
-            // Display the predicted Y-value in the output div
-            var outputDiv = document.getElementById("output");
+            const inputX = parseFloat(document.getElementById("inputX").value);
+            const predictedY = model.predict([inputX]);
+            const outputDiv = document.getElementById("output");
             outputDiv.innerHTML = "Predicted Y-value: " + predictedY[0].toFixed(2);
         }
 
-        // Plot the data
-        var trace1 = {
+        const trace1 = {
             x: dataX,
             y: dataY,
             mode: 'markers',
@@ -156,7 +120,7 @@
             marker: { size: 8 }
         };
 
-        var layout = {
+        const layout = {
             title: 'Random Forest Regressor',
             xaxis: { title: 'X' },
             yaxis: { title: 'Y' },
@@ -166,5 +130,3 @@
     </script>
 </body>
 </html>
-
-
